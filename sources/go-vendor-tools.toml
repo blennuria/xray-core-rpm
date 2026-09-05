@@ -1,0 +1,24 @@
+[[licensing.licenses]]
+path = "vendor/github.com/cloudflare/circl/LICENSE"
+sha256sum = "b0da1764fe4d13d610b695536fc3f2ebc362482d053a1cd258e36975bc6b97a7"
+expression = "BSD-3-Clause"
+
+[[licensing.licenses]]
+path = "vendor/github.com/ghodss/yaml/LICENSE"
+sha256sum = "24653fd8a39354396da1a265d68316399edc39b1df48c5866d55f9f06484fa9a"
+expression = "MIT"
+
+[[licensing.licenses]]
+path = "vendor/github.com/juju/ratelimit/LICENSE"
+sha256sum = "a92f49abd3f15a3523b022a9b74fb885b53c228f8244c817add3a835427b10d9"
+expression = "LGPL-3.0-only"
+
+[[licensing.licenses]]
+path = "vendor/github.com/miekg/dns/COPYRIGHT"
+sha256sum = "66550c0ad5ca7ec1e08683e5f872cc45c741f311eee3b8ee484206ecbf9c740d"
+expression = "BSD-3-Clause"
+
+[[licensing.licenses]]
+path = "vendor/gopkg.in/yaml.v3/LICENSE"
+sha256sum = "d18f6323b71b0b768bb5e9616e36da390fbd39369a81807cca352de4e4e6aa0b"
+expression = "MIT AND Apache-2.0"

@@ -1,0 +1,134 @@
+name: build
+
+on:
+  push:
+    tags: ['[0-9]*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GEODATA_URL: https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download
+
+jobs:
+  build:
+    name: el${{ matrix.el }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - el: 9
+            image: quay.io/centos/centos:stream9
+            mock_config: centos-stream+epel-9-x86_64
+          - el: 10
+            image: quay.io/centos/centos:stream10
+            mock_config: centos-stream+epel-10-x86_64
+
+    # The image must match the target EL: mock builds its bootstrap chroot
+    # from the host repositories, and a cross-release bootstrap fails on GPG
+    # key import. Same reason for --no-bootstrap-image below.
+    container:
+      image: ${{ matrix.image }}
+      # mock needs mount namespaces and overlayfs to set up the chroot
+      options: --privileged
+
+    steps:
+      - name: Install build tools
+        run: |
+          dnf install -y --nogpgcheck epel-release
+          dnf install -y --nogpgcheck \
+            mock rpm-build rpmdevtools golang git-core bzip2
+
+          # mock refuses to run as root: it needs an unprivileged uid to drop
+          # privileges to, and regains root through its setuid wrapper. Group
+          # membership is what lets that wrapper's PAM stack through.
+          useradd -m builder
+          usermod -aG mock builder
+
+      - uses: actions/checkout@v7
+
+      - name: Prepare sources
+        run: |
+          set -eux
+          version=$(awk '/^Version:/ {print $2}' xray-core.spec)
+
+          curl -fsSL -o "sources/Xray-core-${version}.tar.gz" \
+            "https://github.com/XTLS/Xray-core/archive/v${version}/Xray-core-${version}.tar.gz"
+          curl -fsSL -o sources/geoip.dat   "${GEODATA_URL}/geoip.dat"
+          curl -fsSL -o sources/geosite.dat "${GEODATA_URL}/geosite.dat"
+
+          tmp=$(mktemp -d)
+          tar xf "sources/Xray-core-${version}.tar.gz" -C "$tmp"
+          cd "$tmp/Xray-core-${version}"
+          go mod vendor
+          tar cjf "${GITHUB_WORKSPACE}/sources/Xray-core-${version}-vendor.tar.bz2" vendor
+
+      # A tag carries the release too (26.7.28-1), so the same version can be
+      # rebuilt as -2; refuse to publish packages the tag does not name.
+      - name: Check tag matches spec
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          nvr=$(awk '/^Version:/ {v=$2} /^Release:/ {sub(/%\{\?dist\}/, "", $2); r=$2} END {print v "-" r}' xray-core.spec)
+          test "$GITHUB_REF_NAME" = "$nvr" || {
+            echo "tag $GITHUB_REF_NAME does not match spec $nvr" >&2
+            exit 1
+          }
+
+      - name: Build SRPM
+        run: |
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          runuser -u builder -- mock -r ${{ matrix.mock_config }} --no-bootstrap-image \
+            --buildsrpm \
+            --spec xray-core.spec \
+            --sources sources/ \
+            --resultdir result/srpm
+
+      - name: Build RPM
+        run: |
+          runuser -u builder -- mock -r ${{ matrix.mock_config }} --no-bootstrap-image \
+            --rebuild result/srpm/*.src.rpm \
+            --resultdir result/rpm
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: rpm-el${{ matrix.el }}
+          path: result/rpm/*.rpm
+          if-no-files-found: error
+
+      - name: Upload mock logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: logs-el${{ matrix.el }}
+          path: result/**/*.log
+          if-no-files-found: ignore
+
+  release:
+    name: release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: rpm-el*
+          merge-multiple: true
+          path: dist
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Source RPMs stay in the run artifacts; the spec lives here and the
+          # build is reproducible from the tag, so publishing them is dead weight.
+          rm -f dist/*.src.rpm
+          gh release create "$GITHUB_REF_NAME" dist/*.rpm \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes
