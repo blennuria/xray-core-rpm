@@ -12,7 +12,6 @@ fi
 
 # License files and their SPDX expressions
 declare -A LICENSES=(
-    ["vendor/github.com/cloudflare/circl/LICENSE"]="BSD-3-Clause"
     ["vendor/github.com/ghodss/yaml/LICENSE"]="MIT"
     ["vendor/github.com/juju/ratelimit/LICENSE"]="LGPL-3.0-only"
     ["vendor/github.com/miekg/dns/COPYRIGHT"]="BSD-3-Clause"

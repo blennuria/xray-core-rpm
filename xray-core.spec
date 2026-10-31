@@ -4,7 +4,7 @@
 %bcond prebuilt 0
 
 Name:           xray-core
-Version:        26.9.30
+Version:        26.10.21
 Release:        1%{?dist}
 Summary:        Xray, Penetrates Everything. Also the best v2ray-core. Project X network proxy tool
 URL:            https://github.com/XTLS/Xray-core
@@ -128,6 +128,9 @@ install -Dpm 0644 %{SOURCE1} %{buildroot}%{_datadir}/licenses/%{name}/LICENSE
 %attr(0750,xray,xray) %dir %{_localstatedir}/log/xray
 
 %changelog
+* Sat Oct 31 2026 blennuria <blennuria@pm.me> - 26.10.21-1
+- Update to 26.10.21
+
 * Sat Oct 31 2026 blennuria <blennuria@pm.me> - 26.9.30-1
 - Update to 26.9.30
 - License: drop GPL-3.0-only, sagernet/sing is no longer vendored
