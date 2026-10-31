@@ -4,13 +4,13 @@
 %bcond prebuilt 0
 
 Name:           xray-core
-Version:        26.9.9
+Version:        26.9.30
 Release:        1%{?dist}
 Summary:        Xray, Penetrates Everything. Also the best v2ray-core. Project X network proxy tool
 URL:            https://github.com/XTLS/Xray-core
 
 %if %{without prebuilt}
-License:        Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND GPL-3.0-only AND ISC AND LGPL-3.0-only AND MIT AND MPL-2.0
+License:        Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND ISC AND LGPL-3.0-only AND MIT AND MPL-2.0
 Source0:        https://github.com/XTLS/Xray-core/archive/v%{version}/Xray-core-%{version}.tar.gz
 Source1:        Xray-core-%{version}-vendor.tar.bz2
 Source2:        go-vendor-tools.toml
@@ -128,6 +128,10 @@ install -Dpm 0644 %{SOURCE1} %{buildroot}%{_datadir}/licenses/%{name}/LICENSE
 %attr(0750,xray,xray) %dir %{_localstatedir}/log/xray
 
 %changelog
+* Sat Oct 31 2026 blennuria <blennuria@pm.me> - 26.9.30-1
+- Update to 26.9.30
+- License: drop GPL-3.0-only, sagernet/sing is no longer vendored
+
 * Sat Oct 31 2026 blennuria <blennuria@pm.me> - 26.9.9-1
 - Update to 26.9.9
 - Require golang >= 1.27
