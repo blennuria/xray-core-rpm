@@ -16,7 +16,7 @@ declare -A LICENSES=(
     ["vendor/github.com/ghodss/yaml/LICENSE"]="MIT"
     ["vendor/github.com/juju/ratelimit/LICENSE"]="LGPL-3.0-only"
     ["vendor/github.com/miekg/dns/COPYRIGHT"]="BSD-3-Clause"
-    ["vendor/gopkg.in/yaml.v3/LICENSE"]="MIT AND Apache-2.0"
+    ["vendor/go.yaml.in/yaml/v3/LICENSE"]="MIT AND Apache-2.0"
 )
 
 tmpdir=$(mktemp -d)

@@ -4,7 +4,7 @@
 %bcond prebuilt 0
 
 Name:           xray-core
-Version:        26.7.28
+Version:        26.9.9
 Release:        1%{?dist}
 Summary:        Xray, Penetrates Everything. Also the best v2ray-core. Project X network proxy tool
 URL:            https://github.com/XTLS/Xray-core
@@ -34,7 +34,7 @@ Source8:        xray.sysusers
 ExclusiveArch:  x86_64 aarch64
 
 %if %{without prebuilt}
-BuildRequires:  golang >= 1.23
+BuildRequires:  golang >= 1.27
 BuildRequires:  gcc
 BuildRequires:  go-vendor-tools
 BuildRequires:  go-rpm-macros
@@ -128,5 +128,9 @@ install -Dpm 0644 %{SOURCE1} %{buildroot}%{_datadir}/licenses/%{name}/LICENSE
 %attr(0750,xray,xray) %dir %{_localstatedir}/log/xray
 
 %changelog
+* Sat Oct 31 2026 blennuria <blennuria@pm.me> - 26.9.9-1
+- Update to 26.9.9
+- Require golang >= 1.27
+
 * Sun Sep 06 2026 blennuria <blennuria@pm.me> - 26.7.28-1
 - Initial package
